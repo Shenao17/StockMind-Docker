@@ -1,0 +1,49 @@
+# ─── Java ────────────────────────────────────────────────────────────────────
+backend/target/
+backend/.mvn/
+*.class
+*.jar
+*.war
+
+# Credenciales — subir application.properties.example en su lugar
+backend/src/main/resources/application.properties
+
+# ─── Python ──────────────────────────────────────────────────────────────────
+analytics/venv/
+analytics/__pycache__/
+analytics/src/__pycache__/
+analytics/src/routes/__pycache__/
+analytics/src/services/__pycache__/
+analytics/src/models/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Credenciales — subir config.py.example en su lugar
+analytics/config.py
+
+# ─── Frontend React ───────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ─── Node / Gateway ──────────────────────────────────────────────────────────
+gateway/node_modules/
+gateway/.env
+
+# ─── Sistema operativo ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── IDEs ────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+
+# ─── Base de datos ───────────────────────────────────────────────────────────
+*.sql.bak

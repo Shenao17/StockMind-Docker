@@ -6,6 +6,33 @@
 
 ## Changelog
 
+### v1.2.0 — Agente de IA Conversacional (Experimental)
+> Mayo 2026
+
+Se integra un asistente de inteligencia artificial conversacional como componente flotante en el frontend, accesible desde cualquier módulo del sistema. El agente opera en modo experimental y no tiene acceso directo a la base de datos en esta versión.
+
+**Cambios realizados:**
+- Nuevo componente `AgentBubble.jsx` — burbuja flotante tipo FAB posicionada en la esquina inferior derecha, visible en todos los módulos autenticados
+- Integración con **Groq API** usando el modelo `llama-3.3-70b-versatile` como motor de lenguaje
+- Contexto dinámico por módulo: el agente reconoce en qué sección del sistema se encuentra el usuario y adapta sus respuestas y sugerencias
+- Chips de preguntas rápidas específicos por módulo (Dashboard, Productos, Inventario, Ventas, Reportes, Predicciones, Usuarios)
+- Indicador de estado en tiempo real: **en línea** (verde), **verificando** (amarillo), **sin conexión** (rojo)
+- Banner de servicio no disponible con botón de reintento automático
+- Mensajes de error amigables diferenciados por tipo de fallo (cuota agotada, API key inválida, error de red)
+- Historial de conversación con contexto de los últimos 10 mensajes por sesión
+
+**Estado experimental — limitaciones conocidas:**
+- El agente no tiene acceso directo al backend ni a la base de datos; responde con conocimiento general del sistema
+- La API key de Groq debe configurarse manualmente en el componente o como variable de entorno Vite
+- El historial de conversación no persiste entre sesiones
+
+**Lo que NO cambió:**
+- Arquitectura del sistema — ningún servicio existente fue modificado
+- Gateway Node.js, backend Java, microservicio Python y base de datos intactos
+- Lógica de autenticación, rutas protegidas y todos los módulos funcionales
+
+---
+
 ### v1.1.0 — Migración del Frontend a React
 > Abril 2026
 
@@ -117,6 +144,7 @@ Desarrollar una plataforma web full stack para la gestión integral de inventari
 - Predicción de demanda semanal/mensual por producto
 - Recomendaciones automáticas de cantidad a reabastecer
 - Reportes de ventas por período
+- Asistente de IA conversacional integrado (experimental, v1.2.0)
 
 ### Excluido
 
@@ -125,6 +153,7 @@ Desarrollar una plataforma web full stack para la gestión integral de inventari
 - Aplicación móvil nativa
 - Modelos de machine learning avanzados (LSTM, Prophet)
 - Multi-tenancy
+- Acceso del agente IA a datos en tiempo real del backend (previsto para v1.3.0)
 
 ---
 
@@ -144,6 +173,7 @@ Desarrollar una plataforma web full stack para la gestión integral de inventari
 | RF-08 | Reportes | Ventas por rango de fechas y por producto |
 | RF-09 | Predicción | Demanda semanal y mensual por producto |
 | RF-10 | Recomendación | Cantidad sugerida a reabastecer por producto |
+| RF-11 | Agente IA | Asistente conversacional accesible desde cualquier módulo (experimental) |
 
 ### Requisitos No Funcionales
 
@@ -167,6 +197,7 @@ Desarrollar una plataforma web full stack para la gestión integral de inventari
 │                    CLIENTE (Browser)                      │
 │         React 18 + Vite + React Router DOM               │
 │         Context API para sesión JWT                       │
+│         AgentBubble (Groq / Llama 3.3) [experimental]    │
 └─────────────────────┬────────────────────────────────────┘
                       │ HTTP/REST
                       ▼
@@ -201,6 +232,8 @@ Desarrollar una plataforma web full stack para la gestión integral de inventari
 
 El frontend **nunca** consume directamente el backend Java ni el microservicio Python. Todo el tráfico pasa por el gateway Node.js, que actúa como único punto de entrada, aplicando autenticación centralizada y enrutamiento transparente.
 
+El agente de IA (`AgentBubble`) es el único componente que realiza llamadas externas directamente desde el navegador, exclusivamente hacia la API de Groq. No interactúa con el gateway ni con los servicios internos del sistema en esta versión.
+
 ---
 
 ## Tecnologías Utilizadas
@@ -220,6 +253,8 @@ El frontend **nunca** consume directamente el backend Java ni el microservicio P
 | pandas | 2.x | Analítica | Manipulación de series temporales |
 | scikit-learn | 1.x | ML | Modelos de regresión y predicción |
 | JWT | — | Autenticación | Stateless, compatible con arquitectura distribuida |
+| Groq API | — | Motor IA (experimental) | Inferencia ultrarrápida, free tier generoso, compatible con formato OpenAI |
+| Llama 3.3 70B | — | Modelo de lenguaje (experimental) | Capacidad conversacional avanzada en español |
 
 ---
 
@@ -254,7 +289,8 @@ stockmind/
 │       │   │   └── Sidebar.jsx
 │       │   └── ui/
 │       │       ├── Modal.jsx
-│       │       └── ToastContainer.jsx
+│       │       ├── ToastContainer.jsx
+│       │       └── AgentBubble.jsx  ← Agente IA conversacional [experimental]
 │       └── pages/
 │           ├── Login.jsx
 │           ├── Dashboard.jsx
@@ -445,6 +481,17 @@ Python: consulta MySQL → aplica modelo estadístico
 → Gateway → Frontend: renderiza resultado
 ```
 
+### Flujo 4: Agente IA (experimental)
+
+```
+Usuario → escribe pregunta en AgentBubble (frontend)
+AgentBubble → POST https://api.groq.com/openai/v1/chat/completions
+Groq (Llama 3.3 70B): procesa con contexto del módulo actual
+→ retorna respuesta en lenguaje natural → AgentBubble renderiza mensaje
+```
+
+> El agente opera de forma completamente independiente al gateway y los servicios internos. No requiere autenticación JWT para funcionar.
+
 ---
 
 ## Guía de Instalación y Ejecución
@@ -456,12 +503,13 @@ Python: consulta MySQL → aplica modelo estadístico
 - Python 3.11+
 - MySQL 8.x
 - Maven 3.x
+- API Key de Groq (gratuita en [console.groq.com](https://console.groq.com)) — requerida para el agente IA
 
 ### Inicio rápido (Windows)
 
 Ejecutar `start.bat` en la raíz del proyecto. El script levanta todos los servicios en orden y abre el navegador automáticamente en `http://localhost:5173`.
 
-> Requiere XAMPP con MySQL activo y la base de datos inicializada previamente.
+> Requiere MySQL Community Server 8.x activo y la base de datos inicializada previamente.
 
 ### 1. Base de datos
 
@@ -517,6 +565,22 @@ PYTHON_API_URL=http://localhost:8000
 JWT_SECRET=stockmind_super_secret_key_2024
 ```
 
+### Configuración del agente IA (opcional)
+
+El agente IA requiere una API key de Groq. Configúrala como variable de entorno de Vite para no exponerla en el código fuente:
+
+```env
+# frontend/.env
+VITE_GROQ_API_KEY=tu_api_key_aqui
+```
+
+```jsx
+// App.jsx
+<AgentBubble geminiApiKey={import.meta.env.VITE_GROQ_API_KEY} />
+```
+
+> Si no se configura la API key, el agente mostrará el indicador de estado "sin conexión" y no afectará el funcionamiento del resto del sistema.
+
 ---
 
-*Desarrollado como proyecto académico — StockMind v1.1.0*
+*Desarrollado como proyecto académico — StockMind v1.2.0 (experimental)*
