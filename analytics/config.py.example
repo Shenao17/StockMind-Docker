@@ -1,0 +1,9 @@
+# ─── StockMind — Analytics Configuration ─────────────────────────────────────
+# Copia este archivo como config.py y llena tus valores locales.
+# NUNCA subas config.py al repositorio.
+
+DB_HOST = "localhost"
+DB_PORT = 3306
+DB_NAME = "stockmind_db"
+DB_USER = "TU_USUARIO_MYSQL"
+DB_PASSWORD = "TU_PASSWORD_MYSQL"

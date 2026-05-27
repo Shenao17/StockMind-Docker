@@ -1,0 +1,17 @@
+# ─── StockMind — Backend Configuration ───────────────────────────────────────
+# Copia este archivo como application.properties y llena tus valores locales.
+# NUNCA subas application.properties al repositorio.
+
+spring.datasource.url=jdbc:mysql://localhost:3306/stockmind_db?useSSL=false&serverTimezone=UTC
+spring.datasource.username=TU_USUARIO_MYSQL
+spring.datasource.password=TU_PASSWORD_MYSQL
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+server.port=8080
+
+jwt.secret=TU_JWT_SECRET_AQUI
+jwt.expiration=86400000
