@@ -1,0 +1,150 @@
+===============================================
+  STOCKMIND — GUÍA DE INICIO CON DOCKER
+===============================================
+
+  ⚠ LEE TODO ESTE DOCUMENTO ANTES DE EMPEZAR ⚠
+  Sigue los pasos en orden y con atención.
+  Saltarse cualquier paso puede hacer que el
+  proyecto no arranque o no sea accesible.
+  Si algo falla, revisa primero aquí la solución.
+
+===============================================
+
+¿POR QUÉ DOCKER?
+----------------
+StockMind usa Docker para garantizar compatibilidad entre
+distintos equipos y sistemas operativos. Así no importa si
+tienes Windows, Mac o Linux — el proyecto corre igual en
+todos lados sin necesidad de instalar Java, Python, Node.js
+o MySQL manualmente en tu máquina.
+
+PRE-REQUISITOS
+--------------
+- Docker Desktop corriendo
+- Puertos disponibles: 5173, 3000, 8080, 8000, 3306
+
+- Credenciales de acceso a la app:
+    usuario: admin  |  contraseña: admin123
+    
+-----------------------------------------------
+PASO 1 — Posicionarse en la raíz del proyecto
+-----------------------------------------------
+cd StockMind
+
+-----------------------------------------------
+PASO 2 — Obtener y configurar tu GROQ API KEY
+-----------------------------------------------
+StockMind usa Groq para las funciones de IA/analytics.
+Cada quien debe crear su propia key gratuita:
+
+  1. Ir a: https://console.groq.com
+  2. Crear cuenta (es gratis)
+  3. Ir a "API Keys" → "Create API Key"
+  4. Copiar la key generada
+
+Luego en docker-compose.yml, reemplazar en el servicio "gateway":
+
+  GROQ_API_KEY: TU_GROQ_API_KEY_AQUI
+                ↑ pegar aquí tu key
+
+  ⚠ NO compartas ni subas tu key a Git.
+
+-----------------------------------------------
+PASO 3 — Levantar todos los servicios
+-----------------------------------------------
+docker compose up --build
+
+  Servicios y puertos:
+    • mysql       (stockmind_db)        → 3306
+    • backend     (stockmind_backend)   → 8080  [Spring Boot]
+    • analytics   (stockmind_analytics) → 8000  [Python Flask]
+    • gateway     (stockmind_gateway)   → 3000  [Node.js]
+    • frontend    (stockmind_frontend)  → 5173  [React/Vite]
+
+  NOTA: MySQL tiene healthcheck. Spring Boot y Flask
+  esperan a que MySQL esté listo antes de arrancar.
+  Primera vez puede tardar 1-2 min.
+
+-----------------------------------------------
+PASO 4 — Verificar que todo esté OK
+-----------------------------------------------
+docker compose ps
+
+  Todos deben aparecer en estado "running".
+  Si "backend" o "analytics" aparecen "restarting",
+  espera un momento — están esperando a MySQL.
+
+-----------------------------------------------
+PASO 5 — Abrir el frontend desde Docker Desktop
+-----------------------------------------------
+  Opción A — desde Docker Desktop (recomendada):
+    1. Abrir Docker Desktop
+    2. Ir a la sección "Containers"
+    3. Buscar el contenedor "stockmind_frontend"
+    4. Clic en el enlace del puerto 5173 que aparece
+       junto al contenedor → abre el navegador solo
+
+  Opción B — manual:
+    Abrir el navegador y entrar a: http://localhost:5173
+
+  Otros servicios (solo si necesitas debug):
+    Gateway:    http://localhost:3000
+    Backend:    http://localhost:8080
+    Analytics:  http://localhost:8000
+
+-----------------------------------------------
+COMANDOS ÚTILES
+-----------------------------------------------
+# Ver logs en tiempo real (todos los servicios)
+docker compose logs -f
+
+# Logs de un servicio específico
+docker compose logs -f backend
+docker compose logs -f analytics
+docker compose logs -f gateway
+docker compose logs -f frontend
+docker compose logs -f mysql
+
+# Parar todo (sin borrar datos)
+docker compose stop
+
+# Parar y eliminar contenedores
+docker compose down
+
+# Parar, eliminar contenedores Y volumen de MySQL (reset DB)
+docker compose down -v
+
+# Reconstruir solo un servicio (ej: tras cambios en backend)
+docker compose up --build backend
+
+# Reiniciar un servicio sin rebuild
+docker compose restart gateway
+
+-----------------------------------------------
+ORDEN DE ARRANQUE (automático vía depends_on)
+-----------------------------------------------
+mysql → backend + analytics → gateway → frontend
+
+-----------------------------------------------
+NOTAS
+-----------------------------------------------
+- La BD se inicializa automáticamente con:
+    database/schema.sql  (estructura)
+    database/seed.sql    (datos iniciales)
+
+- Si borras el volumen (down -v), la BD se recrea
+  desde cero con esos archivos al próximo up.
+
+- Credenciales MySQL (solo desarrollo local):
+    usuario: root  |  password: root  |  db: stockmind_db
+
+- Credenciales de acceso a la app:
+    usuario: admin  |  contraseña: admin123
+
+  NOTA: El sistema de usuarios tuvo un problema durante
+  la migración de HTML a React que no alcanzó a corregirse.
+  Si el login falla, usar siempre estas credenciales por defecto.
+
+- JWT_SECRET está hardcodeado para dev. Cambiar en producción.
+
+===============================================
