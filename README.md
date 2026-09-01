@@ -6,6 +6,12 @@
 
 ## Changelog
 
+## [1.2.1] - Solucionado Seed.sql
+> Septiembre 2026
+
+### Fixed
+- Corregido problema de encoding UTF-8 en `seed.sql` que causaba corrupción de tildes/ñ al importar la base de datos en Docker (mojibake tipo "Ã¡" en vez de "á").
+
 ### v1.2.0 — Agente de IA Conversacional (Experimental)
 > Mayo 2026
 
