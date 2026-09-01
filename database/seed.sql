@@ -5,10 +5,11 @@
 -- =============================================================================
 
 USE stockmind_db;
+SET NAMES utf8mb4;
 
-ALTER TABLE products 
-MODIFY COLUMN updated_at TIMESTAMP 
-DEFAULT CURRENT_TIMESTAMP 
+ALTER TABLE products
+MODIFY COLUMN updated_at TIMESTAMP
+DEFAULT CURRENT_TIMESTAMP
 ON UPDATE CURRENT_TIMESTAMP;
 -- =============================================================================
 -- Usuarios iniciales
